@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planet Hati - Untuk Mas Irf'a'ul Ulum</title>
+<style>
+body { margin: 0; overflow: hidden; background: #000; }
+canvas { display: block; }
+#info {
+position: absolute;
+top: 20px;
+width: 100%;
+text-align: center;
+color: white;
+font-family: Arial, sans-serif;
+font-size: 20px;
+text-shadow: 0 0 10px #ff69b4;
+}
+</style>
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+"imports": {
+"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}
+</script>
+</head>
+<body>
+<div id="info">Selamat Ulang Tahun Mas Irf'a'ul Ulum 🎂<br>Geser layar buat muter planet hati 💖</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Scene + Camera + Renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Bikin planet hati pake formula matematika wkwk
+function heartShape(t) {
+const x = 16 * Math.pow(Math.sin(t), 3);
+const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+return new THREE.Vector3(x, y, 0);
+}
+
+const heartPoints = [];
+for(let i = 0; i < Math.PI * 2; i += 0.1) {
+heartPoints.push(heartShape(i));
+}
+
+const heartGeometry = new THREE.LatheGeometry(heartPoints, 64);
+const heartMaterial = new THREE.MeshPhongMaterial({
+color: 0xff1493,
+emissive: 0xff69b4,
+shininess: 100
+});
+const planetHati = new THREE.Mesh(heartGeometry, heartMaterial);
+planetHati.scale.set(0.15, 0.15, 0.15);
+scene.add(planetHati);
+
+// Lampu
+const light = new THREE.PointLight(0xffffff, 2, 100);
+light.position.set(10, 10, 10);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0x404040));
+
+// Bintang2 background
+for(let i = 0; i < 1000; i++) {
+const star = new THREE.Mesh(
+new THREE.SphereGeometry(0.02, 8, 8),
+new THREE.MeshBasicMaterial({color: 0xffffff})
+);
+star.position.set(
+(Math.random() - 0.5) * 100,
+(Math.random() - 0.5) * 100,
+(Math.random() - 0.5) * 100
+);
+scene.add(star);
+}
+
+// Controls biar bisa muter pake jari
+const controls = new OrbitControls(camera, renderer.domElement);
+camera.position.z = 5;
+controls.enableDamping = true;
+
+// Animasi muter
+function animate() {
+requestAnimationFrame(animate);
+planetHati.rotation.y += 0.005;
+planetHati.rotation.x += 0.002;
+controls.update();
+renderer.render(scene, camera);
+}
+animate();
+
+// Responsive HP
+window.addEventListener('resize', () => {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
